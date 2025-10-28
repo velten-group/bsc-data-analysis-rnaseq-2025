@@ -7,7 +7,7 @@
   
 	If you have problems with the installation, take a look at [this video](https://www.youtube.com/watch?v=p8F_wreHTzw) on how to install R and RStudio.
 
-2. Once you have installed R and RStudio, please go to the [exercises](exercises/) page. There you will find two exercises to verify that everyone has a working R installation setup before the course and provides a recap on first steps in R. *Please take a look at both exercises and upload the output by Friday 21 Nov 13:00 to [this heibox folder](https://heibox.uni-heidelberg.de/u/d/8fb9143a95e04fa9a2c8/).*
+2. Once you have installed R and RStudio, please go to the [exercises](exercises/) page. There you will find two exercises to verify that everyone has a working R installation setup before the course and provides a recap on first steps in R. *Please take a look at both exercises and upload the output by Friday 21 Nov 13:00 to [this heibox folder](https://heibox.uni-heidelberg.de/u/d/3fc775beeacb4bcba12b/).*
 
 ## Literature
 Recommended book for further reading include:
