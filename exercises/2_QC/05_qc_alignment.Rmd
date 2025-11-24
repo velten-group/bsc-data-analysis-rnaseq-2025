@@ -1,0 +1,184 @@
+---
+title: Alignment and QC Metrics
+author: 'Nikolai Koehler (adapted from package vignettes)'
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r qi, include=FALSE}
+qi <- 1
+```
+
+# Alignment
+
+In this excercise, we are using the R interface to HISAT2 `Rhisat2` for alignment. HISAT2 is a splice-aware mapping tool based on Bowtie2.
+
+Before we start with the actual, let's first ensure that the `Rhisat2` package is installed.
+
+```{r rhisat install, message=FALSE}
+if (!requireNamespace('BiocManager', quietly = TRUE))
+    install.packages('BiocManager')
+if (!requireNamespace('Rhisat2', quietly = TRUE))
+	BiocManager::install('Rhisat2')
+
+library(Rhisat2)
+```
+
+Additionally, we are going to use the `ShortRead` library to view fastq files.
+```{r install shortread, message=FALSE}
+if (!requireNamespace('ShortRead', quietly = TRUE))
+	BiocManager::install('ShortRead')
+
+library(ShortRead)
+```
+
+## Data
+
+For this exercise, we are using example data from `Rhisat2`.
+
+To download the fasta files of the reference genome run
+```{r load genome}
+reference_files <- list.files(
+	system.file('extdata/refs', package='Rhisat2'),
+    full.names=TRUE,
+	pattern='\\.fa$'
+)
+# names of the files
+reference_files
+```
+
+Analogously, to get the fastq files containing the sequencing reads run
+```{r load reads}
+reads <- list.files(
+	system.file('extdata/reads', package='Rhisat2'),
+	pattern='\\.fastq$',
+	full.names=TRUE
+)
+reads
+```
+
+Use the the `ShortRead` package and its `readFastq` function to read in the first file in `reads` and print out the id of the first read.
+
+```{r readFastq}
+fq_file <- # TODO
+```
+
+Inspect the data structure and print out the Phred scores together with the sequence
+```{r phred}
+
+```
+
+```{r seq}
+```
+
+**Question `r qi <- qi + 1`**: What are the first 5 bases of the *second* read and what are their probabilities of being called correctly?
+
+## Build Genome Index
+
+`Rhisat2` saves all the genome index into files. We will set up a temporary directory to save the files to.
+
+```{r}
+td <- tempdir()
+```
+
+The first step is to build or genome index, i.e. our reference. This can be done with the `hisat2_build` function.
+Make sure you refer to the correct location of the reference files downloaded above.
+Remember that for any function in R you can get the help page by running `?<function-name>`
+
+```{r build index}
+# generate genome index
+```
+
+
+## Read Alignment
+
+Having build the genome index, we can now use `Rhisat2`'s main function `hisat2` to align our reads.
+To do so, make sure you reference the correct list of read files as well as the path and prefix of the genome index from the previous code cell.
+
+```{r alignment}
+# aligning reads to genome index
+alignment <- #TODO
+# the output is a vector of characters
+cat(paste(alignment, collapse="\n"))
+```
+
+**Question `r qi <- qi + 1`**: What chromosome is the first read assigned to?
+Inspect the alignment output to find out. Also, try to see what other information you can identify in the file.
+
+
+# QC
+
+To showcase QC metrics, we are using the `Rfastp` package.
+
+```{r load fastp, message=FALSE}
+if (!requireNamespace('Rfastp', quietly = TRUE))
+	BiocManager::install('Rfastp')
+
+library(Rfastp)
+```
+
+## Data
+
+Unfortunately, the `Rhisat2` is not well suited to showcase the capabilities of `Rfastp`. 
+Luckily, it provides its own examples, that we can use to get a glimpse at some QC outputs.
+
+```{r rfastp data}
+pe_read1 <- system.file('extdata', 'reads1.fastq.gz', package='Rfastp')
+pe_read2 <- system.file('extdata', 'reads2.fastq.gz', package='Rfastp')
+pe_read2
+```
+
+## Basic QC Report
+
+Check out the documentation of `rfastp` and use it to generate a json report for reads 1 and 2
+
+```{r report}
+pe_json_report <- rfastp(
+	# TODO
+)
+```
+
+## UMI processing
+
+The reads in this example come from a run on a 10x instrument, which have a UMI length of 16.
+Use this information to update the report generation above to perform umi processing.
+
+```{r umis}
+umi_json_report <- rfastp(
+    # TODO
+)
+```
+
+## 3' Trimming
+
+To further finetune the trimming process, add options to cut low-quality bases at the 3' *and* 5' tails.
+Additionally, discard reads with less than 30 bases. 
+**Question `r qi <- qi + 1`**: What is the default value here for `rfastp`.
+
+```{r}
+clipr_json_report <- rfastp(
+    # TODO
+)
+```
+
+**Question `r qi <- qi + 1`**: How do the QC statistics change when adding 3' trimming compared to only adapter trimming?
+**Question `r qi <- qi + 1`**: What does the report suggest about the quality of the sequences?
+
+**Hint**: you can use the `qcSummar` and `trimSummary` functions.
+
+
+## Plotting
+
+To investigate the QC results, plotting some quality metrics per cycle can be helpful.
+
+Plot the GC content per position using the `curvePlot` function.
+
+```{r GC content}
+# TODO
+```
+
+Plot the base quality per position
+
+```{r base quality}
+# TODO
+```

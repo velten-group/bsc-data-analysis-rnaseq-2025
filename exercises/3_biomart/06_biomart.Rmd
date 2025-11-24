@@ -1,0 +1,124 @@
+---
+title: "biomart Introduction"
+author: "Nikolai Köhler"
+date: "2025-11-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require("biomaRt", quietly = TRUE))
+    BiocManager::install("biomaRt")
+
+library(biomaRt)
+library(tidyverse)
+```
+
+## Load ensembl mart
+
+
+Load ensembl mart for **human genes**
+
+**Task 1**: setup a mart object containing information on genes for the 
+human dataset.
+
+
+*Hints*:
+* `listMarts` gives a list of all available marts
+* `listDatasets` gives a list of available datasets for a given mart
+
+```{r mart}
+ensembl <- # TODO
+```
+
+## Query gene information
+
+*Hints*:
+
+* to find available attributs use `listAttributes`
+* to find available filters use `listFilters`
+* to retrieve information use `getBM` with the appropriate `attributes, `filters`, `values`, and `mart` parameter set
+
+```{r listAttrs}
+# TODO
+```
+
+```{r listFilts}
+# TODO
+```
+
+**Tasks**
+
+Given the following Ensembl ID **ENSG00000141510**, find ...
+
+...the gene name (HGNC symbol) and description
+```{r get-name}
+# TODO
+```
+
+...all associated transcripts
+```{r get-transcripts}
+# TODO
+```
+
+...the chromosome and the position of the gene on the chromosome
+```{r get-position}
+# TODO
+```
+
+# Multi-gene queries
+
+## Finding gene IDs from names
+
+For the following genes, retrieve the corresponding Ensembl gene IDs: BRCA1, MYC, EGFR, PTEN
+
+*Hint*: check how to pass multiple genes to `values`
+
+```{r get-ids}
+target_genes <- c("BRCA1","MYC","EGFR","PTEN")
+# TODO
+```
+
+**Task**: count the number of transcripts per gene
+```{r count-transcripts}
+# TODO
+```
+
+
+In addition to genetic information, ensembl also contains functional annotations,
+such as Gene Ontology terms.
+
+**Task** for the genes given above, retrieve the GO annotations and find the
+GO terms that appear most frequently. 
+
+```{r get-go}
+go_counts <- # TODO
+head(go_counts)
+```
+Side notes:
+
+* this also works the other way round - you can find all genes annotated with a particular GO term)
+* you can retrieve information on GO terms with, for example, the `GO.db` package
+
+**Task**: plot a histogram of the number of occurences of the go terms
+
+```{r}
+# TODO
+```
+
+# Finding Analogs
+
+`biomaRt` also allows to find links between datasets, typically used for finding information
+across organism. The associated `R` function is `getLDS` (get linked dataset).
+
+Use `getLDS?` to find the parameters you need to pass to the function and find the chromosome
+and start position of ENSG00000141510/TP53 on the mouse genome.
+
+```{r get-analog}
+# TODO
+```
+
+```{r session-info}
+sessionInfo()
+```
