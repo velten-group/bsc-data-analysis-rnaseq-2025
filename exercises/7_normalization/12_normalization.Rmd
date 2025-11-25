@@ -1,0 +1,131 @@
+---
+title: RNAseq Normalization 
+author: "Nikolai Köhler"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r i_question, include = FALSE, echo = FALSE}
+qi <- 0
+```
+
+# Importing data and loading required packages
+
+In this exercise we are using a simulated dataset from the `DESeq2` package.
+We will be talking more about its capabilities on Friday.
+
+The below code simulates a dataset with 40 samples and 2000 genes
+
+```{r md_setup, message=FALSE}
+if (!requireNamespace("DESeq2", quietly=TRUE))
+    BiocManager::install("DESeq2")
+
+library(DESeq2)
+
+# we set a random seed to make sure results are consistent across sessions
+set.seed(42)
+
+de_data <- makeExampleDESeqDataSet(n=2000, m=40)
+de_data
+```
+
+# Normalizing to Sequencing Depth and Gene Length {#simple-norm}
+
+The simplest form of normalization accounts for sequencing depth and gene length.
+Lucky for us, these methods are quite simple to implement.
+
+## Counts per Million Reads Mapped
+
+Compute the counts per million reads mapped (CPM). 
+To obtain the raw counts from the `de_data` object, you can use the `counts` function.
+
+```{r cpm}
+cpm_corrected <- # TODO
+head(cpm_corrected[,1:10])
+```
+
+**Question `r (qi <- qi + 1)`**: What does CPM control for? Is it suited for within-sample comparisons?
+
+
+## FPKM
+
+Next, we compute the FPKM value. To get the genomic ranges, you can use `rowRanges`.
+`width` will give you the 
+
+```{r fpkm}
+fpkm_corrected <- # TODO
+head(fpkm_corrected[,1:10])
+```
+
+
+## FPKM in `DESeq2`
+
+Get familiar with `DESeq2`'s `fpkm` function and run it below.
+
+```{r deseq}
+# TODO
+```
+
+# Advanced Normalisation Techniques
+
+In the lecture we talked about methods such as variance stabilizing transformation (VST) and trimmed mean of M values (TMM).
+
+**Question `r (qi <- qi + 1)`**: What is the overarching idea of these techniques as compared to the methods in [the previous section](#simple-norm)?
+
+*Important*: Neither of these techniques is ideal for testing differential gene expression!
+We will talk about how to do this properly on Friday.
+
+Unfortunately, these techniques are a little too complicated to be implemented in this exercise. Therefore, we'll resort to an implementation available in `DESeq2`. We will dive deeper into `DESeq2` on Friday.
+For now, it is sufficient to only look at the functions mentioned below.
+
+
+## Variance Stabilizing Transformation
+
+In this section we are using DESeq2 to perform variance stabilizing transformation (VST).
+VST in implemented in `getVarianceStabilizedData`.
+To compute it, size and dispersion factors need to be computed beforehand.
+The corresponding functions are `estimateSizeFactors` and `estimateDispersions`.
+
+```{r}
+de_data <- # TODO: factor size and dispersion estimation
+vsd <- # TODO: variance stabilized data
+```
+
+Plot two histograms comparing the raw counts with the VST data.
+```{r}
+hist(counts(de_data))
+```
+
+```{r}
+hist(vsd)
+```
+
+Another way of visualizing the effect of VST is by plotting the rank of means against the standard deviation, for example using the `meanSdPlot` function from the vsn package.
+
+Use it to show the difference between raw counts, log2 transformed data and VST transformed data.
+*Hint*: use `cowplot::plot_grid` to plot all three into one figure.
+
+```{r}
+library(vsn)
+
+cowplot::plot_grid(
+    plotlist=list(
+        meanSdPlot(counts(de_data))$gg,
+        meanSdPlot(log2(counts(de_data) + 1))$gg,
+        meanSdPlot(vsd)$gg
+    )
+)
+```
+
+## Advanced (if we have time)
+
+Implement your own version of quantile normalization.
+
+Recall the steps for quantile normalization:
+
+1. Order genes by expression for each sample
+2. Compute mean expression *over all samples* for *each rank*
+3. Assign mean values to samples
+4. Reorder back to original gene ordering
+
+If you fell very confident (i.e. *even more advanced*): define a function taking in a data.frame and returning its quantile normalized data.

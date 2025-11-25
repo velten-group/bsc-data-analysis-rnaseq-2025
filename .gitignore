@@ -4,3 +4,4 @@ Slides/
 *.DS_Store
 *.Rhistory
 data/filtered_gene_bc_matrices/
+.Rproj.user
