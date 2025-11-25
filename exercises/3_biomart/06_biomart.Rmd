@@ -21,7 +21,7 @@ library(tidyverse)
 Load ensembl mart for **human genes**
 
 **Task 1**: setup a mart object containing information on genes for the 
-human dataset.
+human dataset using the `useEnsembl` function.
 
 
 *Hints*:
@@ -36,7 +36,7 @@ ensembl <- # TODO
 
 *Hints*:
 
-* to find available attributs use `listAttributes`
+* to list available attributes use `listAttributes`, to search use `searchAttributes` (also allows search by pattern)
 * to find available filters use `listFilters`
 * to retrieve information use `getBM` with the appropriate `attributes, `filters`, `values`, and `mart` parameter set
 
