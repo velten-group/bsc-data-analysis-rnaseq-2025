@@ -1,0 +1,100 @@
+---
+title: "Analysis of single cell data"
+date: "`r Sys.Date()`"
+author: "Velten group"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+# Load libraries
+
+To get started please load the following libraries that you will need for this analysis. Please make sure that you have Seurat version 5 since some functions worked differently in older versions. A Seurat v5 cheat sheet with the essential commands, can be found [here](https://satijalab.org/seurat/articles/seurat5_essential_commands) and an example for a typical Seurat workflow is shown [here](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html).
+
+```{r eval = FALSE, include = FALSE}
+# if not installed yet, install the packages like this
+# Seurat version 5
+install.packages('Seurat')
+# SeuratData
+devtools::install_github('satijalab/seurat-data')
+# tidyverse
+install.packages("tidyverse")
+# uwot
+install.packages("uwot")
+# lisi
+devtools::install_github("immunogenomics/lisi")
+```
+
+```{r message = FALSE}
+library(Seurat)
+library(SeuratData)
+library(tidyverse)
+library(uwot)
+library(lisi)
+```
+
+```{r eval = FALSE, include = FALSE}
+# verify that you have Seurat version 5 installed
+packageVersion("Seurat")
+```
+
+# Data visualization and processing of single-cell data
+For this project, we are using data consisting of 8 pancreas data sets which are provided by the SeuratData package as a Seurat object. 
+```{r message = FALSE, warning = FALSE}
+InstallData("panc8")
+seurat <- LoadData("panc8")
+seurat[["RNA"]] <- split(seurat[["RNA"]], f = seurat$dataset)
+```
+
+**Task 1: Let's first have a look at the Seurat object we just read in. How many cells and genes are included? Which information is contained in the metadata? And how many cells per celltype were measured?**
+
+As mentioned above, the Seurat object consists of 8 different pancreas data sets. But how different are they? What happens if we just treat them as a single data set without considering potential batch effects? 
+```{r}
+unique(seurat$dataset)
+```
+
+**Task 2: Let's start by inspecting some general differences across data sets based on the meta data to practice data visualization. First, plot histograms showing the sequencing depth distribution per dataset. Next, also check the cell type composition per dataset using a stacked bar plot.**
+
+So far, we gained a first impression about our data, but haven't looked at the gene expression itself. To visualize the gene expression profiles of all cells, we can create a UMAP. For this, the data has to be normalized first following the standard Seurat processing pipeline.
+
+**Task 3: Use Seurat to process the count data and run a PCA. At how many principal components would you look at?**
+Hint: You can take the following steps:
+1) Normalize the count data
+2) Find the most highly variable genes
+3) Scale the data to mean 0 and unit variance
+4) Run and plot PCA 
+5) Select number of relevant components e.g. with an elbow plot
+
+**Task 4: Create UMAP plots coloring by sequencing technology ('tech') or celltype. Do you observe batch effects?**
+
+Next, we would like to apply clustering to this data. However, due to the batch effects the clusters will probably be a mix of separating cell types and batches. Therefore, various batch integration methods exist that try to integrate the data and remove this technical signal. We will still perform clustering with Seurat on this data to check and if there is time left you can try out various batch integration methods in Seurat and compare whether cluster purity changes.
+
+**Task 5: Use Seurat to cluster the cells based on the PCA embedding. Do the clusters mostly consist of a single celltype or dataset or are mixed? Visualize this with stacked barplots showing the proportions of celltypes or datasets per cluster.**
+
+# Optional: Batch integration
+
+The function IntegrateLayers in Seurat v5 contains 5 different methods for batch integration. We start by using the CCAIntegration method which first uses canonical correlation analysis to identify shared sources of variation and then finds anchors (matched cell pairs) which are used for batch correction.
+```{r}
+# perform batch integration
+# (this step takes around 5mins to run)
+# (in case the run time is much longer on your laptop, subset the data to contain only 2 datasets)
+seurat <- IntegrateLayers(object = seurat, method = CCAIntegration, 
+                          orig.reduction = "pca", new.reduction = "integrated.cca",
+                          verbose = FALSE)
+```
+
+**Task 6: Run a UMAP on the batch-corrected data ("integrated.cca") and color the plot by dataset and celltype to check how well the batch correction worked.**
+
+If you like to, you can also try out some of the other batch integration methods that are included in Seurat. An overview about them can be found on [this website](https://satijalab.org/seurat/articles/seurat5_integration).
+
+**Task 7: Redo the clustering on your batch-corrected embeddings and check how pure the clusters are now regarding to celltype and dataset. Compare the plots to the ones from Task 5.**
+
+# sessionInfo
+```{r}
+sessionInfo()
+```
